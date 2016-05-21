@@ -1,3 +1,4 @@
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,16 +11,36 @@ public class MapKeys {
     public static void main(String[] args) {
         Map<Company, Object> companies = new HashMap<>();
 
-        Company c1 = new Company("sample");
+        /*Map<BigInteger, Object> ints = new HashMap<>();
+        BigInteger bi = BigInteger.valueOf(1);
+        System.out.println(bi.toString());
+        ints.put(bi, null);
+        bi.add(BigInteger.valueOf(3));
+        System.out.println(bi.toString());
+        System.out.println(ints.containsKey(bi));*/
+
+        List<String> dummy = new ArrayList<>();
+        List<String> dummy2 = new ArrayList<>();
+
+        Company c1 = new Company("sample", dummy);
         companies.put(c1, null);
         c1.addCustomer("the client");
+        c1.removeCustomer("the client");
+        c1.setName("New company");
+        dummy.add("New company");
 
-        Company c2 = new Company("sample");
+        Company c2 = new Company("sample", dummy2);
         companies.containsKey(c2); // don't really care
         c2.addCustomer("the client");
+        c2.removeCustomer("the client");
+        c2.setName("New company");
+        dummy.add("New company");
 
-        Company c3 = new Company("sample");
+        Company c3 = new Company("sample", dummy2);
         c3.addCustomer("the client");
+        c3.removeCustomer("the client");
+        c3.setName("New company");
+        dummy.add("New company");
 
         if (!c1.equals(c2) || !c1.equals(c3) || !c2.equals(c3))
             throw new IllegalStateException("companies must equal");
@@ -46,10 +67,13 @@ class Company {
     //Class does not have constructor. But it is more logical to have company name before you get customers. Even if it is
     // a FIE, the company should have person's name.
 
-    public Company(String name) {
+    public Company(String name, List<String> customerNames) {
         if (name != null) this.name = name;
-        else throw new IllegalArgumentException("Company name cannot be null");
+        else throw new IllegalArgumentException("Company name cannot be null"){};
+        if (customerNames != null) this.customerNames = new ArrayList<>(customerNames);
+        else throw new IllegalArgumentException("Company name cannot be null"){};
     }
+
 
     //Company can change its name, so getter and setter is ok, But it shouldn't let name to be null.
 
@@ -57,20 +81,28 @@ class Company {
         return name;
     }
 
-    public void setName(String name) {
-        if (name != null) this.name = name;
-        else throw new IllegalArgumentException("Company name cannot be null");
+    public List<String> getCustomerNames() {
+        return customerNames;
+    }
+
+    public Company setName(String name) {
+        if (name != null) return new Company(name, this.customerNames);
+        else throw new IllegalArgumentException("Company name cannot be null"){};
     }
 
     //In is not necessary tha in the beginning company should have customers. The come and go.
     //But there is required method for customers removal.
 
-    public void addCustomer(String name) {
-        customerNames.add(name);
+    public Company addCustomer(String name) {
+        List<String> newCustomerNames = new ArrayList<>(customerNames);
+        newCustomerNames.add(name);
+        return new Company(this.name, newCustomerNames);
     }
 
-    public void removeCustomer(String name){
-        customerNames.remove(name);
+    public Company removeCustomer(String name){
+        List<String> newCustomerNames = new ArrayList<>(customerNames);
+        newCustomerNames.remove(name);
+        return new Company(this.name, newCustomerNames);
     }
 
     //This method does not take into account all instances when comparing different objects.
@@ -83,7 +115,7 @@ class Company {
         Company company = (Company) o;
         if (!name.equals(company.name)) return false;
         //---------------------------------------------------------------------------------------------------------
-        if (customerNames != null ? !customerNames.equals(company.customerNames) : company.customerNames != null)
+        if (customerNames != null ? !customerNames.equals(company.getCustomerNames()) : company.getCustomerNames() != null)
             return false;
         //---------------------------------------------------------------------------------------------------------
         return true;
@@ -94,32 +126,15 @@ class Company {
     @Override
     public int hashCode() {
         int result = 0;
-        int nameHashCode = name.hashCode();
-        //int customerHash = customerNames.hashCode();
+        int nameHash = this.name.hashCode();
+        int customerHash = this.customerNames.hashCode();
         if (result == 0){
             result = 17;
-            result = 31 * result + nameHashCode;
-            //result = 31 * result + (customerNames != null ? customerHash : 0);
+            result = 31 * result + nameHash;
+            result = 31 * result + (customerNames != null ? customerHash : 0);
         }
-        //System.out.println(result);
         return result;
     }
-
-    /*
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Company company = (Company) o;
-
-        return name.equals(company.name);
-    }
-
-    @Override
-    public int hashCode() {
-        return name.hashCode();
-    }*/
 }
 
 
